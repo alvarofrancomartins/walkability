@@ -4,7 +4,7 @@ A geospatial-graph analysis built with
 [City2Graph](https://pypi.org/project/city2graph/) (v1.0.0). It downloads the
 walking network of a city **plus a surrounding buffer**, turns it into a graph,
 and computes a single metric for every junction: **reachable walkable network
-length** — the total walkable length that lies inside that junction's 10-minute
+length**, the total walkable length that lies inside that junction's 10-minute
 walking isochrone.
 
 <p align="center">
@@ -13,20 +13,20 @@ walking isochrone.
        width="480">
 </p>
 
-<p align="center"><em>Reachable walkable network length in Curitiba — yellow
+<p align="center"><em>Reachable walkable network length in Curitiba. Yellow
 peaks in the fine-grained, connected districts; purple falls off toward the
 coarse-grained or fragmented edges.</em></p>
 
-The project ships with three cities — Curitiba, Maringá and São Paulo, Brazil —
+The project ships with three cities (Curitiba, Maringá and São Paulo, Brazil),
 chosen via a `--city` flag. The reachable-length approach reads as "how much
-network can you actually reach from here on foot", and it peaks where a junction
+network can you actually reach from here on foot". It peaks where a junction
 sits in a dense, well-connected, fine-grained part of the city.
 
 **Outputs** (one set per city):
 
-- `outputs/{city}/reachable_length.png` — the map: each segment colored by the
+- `outputs/{city}/reachable_length.png`: the map, each segment colored by the
   reachable walkable network length of its location.
-- `outputs/{city}/reachable_length.npy` — per-node reachable walkable network
+- `outputs/{city}/reachable_length.npy`: per-node reachable walkable network
   length (metres), indexed by node id.
 
 ---
@@ -49,10 +49,10 @@ reachable_length(v) = Σ { fraction(e, v) × length(e) }
 ```
 
 where `fraction(e, v)` is the share of edge `e` reachable from `v` within 10
-minutes — an edge that crosses the isochrone boundary contributes only its
+minutes. An edge that crosses the isochrone boundary contributes only its
 reachable portion.
 
-- **yellow (high)** → the junction sits in — or can reach — a dense, connected,
+- **yellow (high)** → the junction sits in, or can reach, a dense, connected,
   fine-grained part of the network, so 10 minutes of walking covers a large
   share of the local streets and paths.
 - **purple (low)** → the junction is in a sparse, disconnected or coarse-grained
@@ -65,10 +65,9 @@ Because the walking speed is a single constant, the 10-minute budget is a fixed
 
 > **local walkable-network density × connectivity (permeability)**
 
-— there is no speed gradient to confound it (no fast roads inflating the reach
-of peripheral junctions). The values peak in the
-fine-grained, connected districts and fall off toward coarse-grained or
-fragmented edges.
+with no speed gradient to confound it (no fast roads inflating the reach of
+peripheral junctions). Values peak in the fine-grained, connected districts and
+fall off toward coarse-grained or fragmented edges.
 
 > Speed is **modeled** (a single walking speed), not observed. The map shows
 > *potential* reach, not actual walking times, and assumes a walkable footway
@@ -118,19 +117,19 @@ the city limit. Downloaded by `download_data.py`:
 PATH="$PWD/.venv/bin:$PATH" .venv/bin/python scripts/download_data.py --city curitiba
 ```
 
-> The on-disk downloads are buffered 15 km around the boundary — a harmless
+> The on-disk downloads are buffered 15 km around the boundary, a harmless
 > superset of the 2 km buffer `download_data.py` requests. The extra buffer does
 > not change any in-city result; a fresh run fetches the 2 km buffer.
 
 ### `data/{city}/walk_segments.parquet` (cache)
 
 The processed, walkable segments with their walking speed. This is a **derived
-cache** — `citynet.py` rebuilds it automatically from the two `.geojson` files
-when it is missing or when the pipeline parameters / source files change (see
-the `.meta` sidecar). The key is built from the source files' size + mtime, not
-their path, so moving the project or renaming folders does not invalidate it.
-Segments carry `length_m`, `speed_kmh` and `travel_time_s`, projected to the
-city's UTM zone (metres).
+cache**. `citynet.py` rebuilds it automatically from the two `.geojson` files
+when it is missing or when the pipeline parameters or source files change (see
+the `.meta` sidecar). The key is built from the source files' size and mtime,
+not their path, so moving the project or renaming folders does not invalidate
+it. Segments carry `length_m`, `speed_kmh` and `travel_time_s`, projected to
+the city's UTM zone (metres).
 
 ### `outputs/{city}/reachable_length.npy` (cache)
 
@@ -154,12 +153,12 @@ grey.
 
 ## Scripts
 
-### `scripts/download_data.py` — (re)download the source data
+### `scripts/download_data.py`: (re)download the source data
 
 Gets a city's boundary, buffers it by 2 km, and downloads Overture `segment` +
 `connector` features for the buffered area into `data/{city}/`.
 
-### `scripts/citynet.py` — data prep + graph construction (shared)
+### `scripts/citynet.py`: data prep + graph construction (shared)
 
 Imported by the compute and plot scripts. Key pieces:
 
@@ -169,7 +168,7 @@ Imported by the compute and plot scripts. Key pieces:
 | `SNAP_M = 5.0` | Endpoint-snapping threshold (metres). |
 | `CODE_VERSION` | Bumped when the filtering/graph logic changes, so the caches rebuild. |
 | `METRIC_VERSION` | Bumped when the metric's *definition* changes (e.g. partial-edge credit), so the `.npy` cache rebuilds even though the segments are unchanged. |
-| `WALK_SPEED_KMH = 4.5` | Single walking speed (km/h) — 1.25 m/s, the standard pedestrian design speed. |
+| `WALK_SPEED_KMH = 4.5` | Single walking speed (km/h), 1.25 m/s, the standard pedestrian design speed. |
 | `NON_WALK_CLASSES` | Road classes a pedestrian cannot walk on: `motorway`, `trunk`. Rail is excluded by the `subtype == "road"` filter. |
 | `FOOT_MODES` | Overture `mode` tokens that mean a denial closes the segment to walking: `foot`, `pedestrian`. |
 | `DROP_SUBCLASS` | Subclasses dropped as non-network: `footway` → `sidewalk`/`crosswalk`, `cycleway` → `cycle_crossing` (duplicate a road centerline), `service` → `driveway`/`parking_aisle` (private vehicle access). |
@@ -177,23 +176,23 @@ Imported by the compute and plot scripts. Key pieces:
 | `load_segments(city)` | Return the processed walkable segments, rebuilding the parquet cache if needed. |
 | `build_graph(seg)` | `segments_to_graph` → `(nodes, edges)` GeoDataFrames. |
 | `load_boundary(city)` | Cached municipal boundary (projected). |
-| `reach_cache_key(city)` | Hash of the metric version + parameters + segment cache — the `.npy` cache key, shared with the plot. |
+| `reach_cache_key(city)` | Hash of the metric version + parameters + segment cache. This is the `.npy` cache key, shared with the plot. |
 | `parse_city()` | Parse `--city` (default `curitiba`). |
 
-### `scripts/compute_reachable_length.py` — compute the metric
+### `scripts/compute_reachable_length.py`: compute the metric
 
 Produces `outputs/{city}/reachable_length.npy`.
 
 | Name | Purpose |
 |---|---|
-| `CUTOFF = 600.0` | The walking-time budget (seconds) — 10 minutes ≈ 750 m. |
+| `CUTOFF = 600.0` | The walking-time budget (seconds), 10 minutes ≈ 750 m. |
 | `dijkstra_reachable_length(...)` | **Numba-JIT** Dijkstra weighted by walking time; returns the reachable walkable network length for one source, crediting each edge for the fraction of its length inside the isochrone (the partial-edge rule). Scratch arrays are owned by the caller and reused across calls, so each search costs O(touched nodes) rather than O(n). |
 | `_component_ids(n, src, dst)` | Union-find over the collapsed edges. |
 | `build_csr(nodes, edges)` | Collapse parallel edges to the shortest one, drop self-loops, build undirected CSR arrays (time + length weights), and return component ids. |
 | `_compute_parallel(...)` | Multiprocess fan-out over the largest component with progress + ETA. |
 | `main()` | Build the graph, keep the largest connected component, compute (or load the cache), and print stats for the buffered area and the city. |
 
-### `scripts/plot_reachable_length.py` — draw the map
+### `scripts/plot_reachable_length.py`: draw the map
 
 Produces `outputs/{city}/reachable_length.png`.
 
@@ -202,7 +201,7 @@ Produces `outputs/{city}/reachable_length.png`.
 | `CMAP = "viridis"` | Sequential colormap. |
 | `load_network(city)` | The walking network plus its boundary. |
 | `attach(edges, boundary, values, column)` | Clip the network to the city with the metric attached per segment (mean of its two endpoints). |
-| `node_mask(nodes, boundary)` | The junctions inside the boundary — the basis for the color scale. |
+| `node_mask(nodes, boundary)` | The junctions inside the boundary. This is the basis for the color scale. |
 | `draw_map(...)` | Draw the map: 2nd–98th percentile scale (with saturation arrows), no-value segments faintly grey, ascending draw order, colorbar. |
 
 The plot script validates the `.npy` cache key against the current parameters
@@ -222,7 +221,7 @@ data/{city}/connector.geojson ┘
         │  scripts/citynet.py
         │   1. keep subtype == "road" (drops rail); drop non-walkable classes
         │      (motorway, trunk); drop segments closed to pedestrians (unconditional
-        │      foot denials, or denials whose mode covers foot — not one-way,
+        │      foot denials, or denials whose mode covers foot; not one-way,
         │      partial-length, or non-foot closures); drop non-network
         │      subclasses (sidewalk/crosswalk/cycle_crossing, which duplicate a
         │      road centerline, and driveway/parking_aisle, which are private
@@ -266,9 +265,9 @@ how grid-like the local street pattern is.
   dropped fragments).
 - **Edges** are the walkable segments, with parallel edges (a footpath alongside
   a road, a divided road with walkable frontage on both sides) collapsed to the
-  shortest one between a node pair, and **self-loops** (segments whose ends
-  snapped to the same node) dropped — a self-loop cannot affect reachability,
-  and keeping it would double-count its length.
+  shortest one between a node pair. **Self-loops** (segments whose ends snapped
+  to the same node) are dropped: a self-loop cannot affect reachability, and
+  keeping it would double-count its length.
 - **Undirected**. Pedestrians are not bound by one-way restrictions, so unlike a
   driving network the undirected assumption is correct rather than approximate.
 
@@ -294,10 +293,10 @@ value the way an all-or-nothing "both endpoints inside" rule would.
 ## How to run
 
 ```bash
-# 0. (re)download the source data — only needed once, or to refresh
+# 0. (re)download the source data (only needed once, or to refresh)
 PATH="$PWD/.venv/bin:$PATH" .venv/bin/python scripts/download_data.py --city curitiba
 
-# 1. (re)compute the metric — skips if the cached .npy is valid
+# 1. (re)compute the metric (skips if the cached .npy is valid)
 .venv/bin/python scripts/compute_reachable_length.py --city curitiba
 
 # 2. draw the map
@@ -332,9 +331,9 @@ the 2 km buffer are shared across cities and need no edits.
 },
 ```
 
-- `geocode` — any place name Nominatim resolves (passed to `get_boundaries`).
-- `display` — label used in map titles and the stats printout.
-- `crs` — a projected, **metre-based** CRS. Segment lengths and travel times
+- `geocode`: any place name Nominatim resolves (passed to `get_boundaries`).
+- `display`: label used in map titles and the stats printout.
+- `crs`: a projected, **metre-based** CRS. Segment lengths and travel times
   are computed in this CRS, so it must be metric (a UTM zone, in practice).
 
 **2. Pick the UTM CRS.** Curitiba and Maringá sit in UTM zone 22S
@@ -407,14 +406,15 @@ The three maxima sit close together (≈35–36 km). For reference, a perfect 10
 grid yields ~23 km under the same partial-edge rule, so these maxima are
 *consistent with* cores that are effectively finer-grained than a 100 m grid
 (block spacings well under 100 m, and/or extra links from alleys, footpaths and
-diagonals) — an inference from the numbers, not a directly measured fact. The
-metric itself only asserts that the peaks sit in the densest, most
+diagonals). That is an inference from the numbers, not a directly measured
+fact. The metric itself only asserts that the peaks sit in the densest, most
 well-connected districts; it does not identify the exact features behind them
 (park path meshes, campuses, divided avenues, or a fine block grid).
-A 10-minute walk covers a tiny slice of any city's total network — the busiest
+
+A 10-minute walk covers a tiny slice of any city's total network. The busiest
 junction reaches ≈0.40% of Maringá's walkable network, ≈0.23% of Curitiba's and
-≈0.08% of São Paulo's. The metric is therefore a *local* measure: it is a pure
-permeability field, peaking in fine-grained, well-connected districts rather
+≈0.08% of São Paulo's. The metric is therefore a *local* measure: a pure
+permeability field that peaks in fine-grained, well-connected districts rather
 than near fast corridors.
 
 The `lowest` value of 0.75 km is a dead-end junction: its isochrone extends a
@@ -442,7 +442,7 @@ value): 2,066 of 70,442 (2.9%) in Curitiba, 912 of 17,346 (5.3%) in Maringá and
   dropped: ~99% of their segments carry no foot-access tag, so keeping them would
   treat expressway centerlines as walkable shortcuts across barriers. Trunk is
   only 0.9–1.9% of network length, so this exclusion removes little aggregate
-  reach — its effect is concentrated in a narrow band alongside the dropped
+  reach. Its effect is concentrated in a narrow band alongside the dropped
   corridors, which show as gaps in the maps. The cost is that a few genuine urban
   trunk avenues are excluded, and highway-like roads Overture classes as
   `primary` or below remain walkable (this exclusion does not address them).
@@ -454,15 +454,15 @@ value): 2,066 of 70,442 (2.9%) in Curitiba, 912 of 17,346 (5.3%) in Maringá and
 - **Unmapped crossings fragment the network.** The connector file carries no
   pedestrian-crossing signal, so a footpath on one side of a road joins the one
   on the other side only if they share a connector point. Where crossings are
-  not digitized, the pedestrian graph fractures at roads — the most common
+  not digitized, the pedestrian graph fractures at roads. This is the most common
   source of disconnected fragments and `NaN` nodes.
 - **Barriers / grade separation are ignored.** `get_barriers=False`;
   `level_rules` are not used, so a 5 m snap can join a footpath to a road across
-  a wall, or an underpass to the street above. For a walking network — where
-  permeability is the very thing being measured — this is the main known bias.
+  a wall, or an underpass to the street above. For a walking network, where
+  permeability is the very thing being measured, this is the main known bias.
 - **Components**: only the largest connected component is analyzed. The dropped
-  nodes are likely snapping failures — the 5 m threshold may leave real paths
-  detached — and are drawn in grey, without a value.
+  nodes are likely snapping failures (the 5 m threshold may leave real paths
+  detached) and are drawn in grey, without a value.
 - **Parallel edges**: collapsed to the shortest edge between a node pair, so a
   longer parallel path (a footpath beside a road, or the second side of a divided
   street) is discarded rather than summed.
@@ -474,8 +474,8 @@ value): 2,066 of 70,442 (2.9%) in Curitiba, 912 of 17,346 (5.3%) in Maringá and
   boundary, so junctions are weighted equally rather than by segment count.
 - **Boundary rule**: each edge is credited for the fraction of its length that
   lies inside the isochrone (see *The metric, precisely*). A path just barely
-  reachable at the 10-minute mark is therefore not dropped — it contributes its
-  reachable portion — and the measure is invariant to how finely roads are split
+  reachable at the 10-minute mark is therefore not dropped; it contributes its
+  reachable portion, and the measure is invariant to how finely roads are split
   into segments. A dead end's minimum is a full 750 m down its single edge
   (0.75 km).
 - **Boundary clipping**: segments are clipped to the municipal boundary with
