@@ -7,6 +7,16 @@ and computes a single metric for every junction: **reachable walkable network
 length** — the total walkable length that lies inside that junction's 10-minute
 walking isochrone.
 
+<p align="center">
+  <img src="outputs/curitiba/reachable_length.png"
+       alt="Reachable walkable network length in Curitiba"
+       width="480">
+</p>
+
+<p align="center"><em>Reachable walkable network length in Curitiba — yellow
+peaks in the fine-grained, connected districts; purple falls off toward the
+coarse-grained or fragmented edges.</em></p>
+
 The project ships with three cities — Curitiba, Maringá and São Paulo, Brazil —
 chosen via a `--city` flag. The reachable-length approach reads as "how much
 network can you actually reach from here on foot", and it peaks where a junction
