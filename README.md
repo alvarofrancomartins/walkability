@@ -14,7 +14,7 @@ isochrone.
 </p>
 
 <p align="center"><em>Reachable walkable network length in Curitiba. Yellow
-peaks in the fine-grained, connected districts; purple falls off toward the
+peaks in the fine-grained, connected paths; purple falls off toward the
 coarse-grained or fragmented edges.</em></p>
 
 The project ships with three cities (Curitiba, Maringá and São Paulo, Brazil),
