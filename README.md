@@ -8,7 +8,7 @@ length**, the total walkable length that lies inside that junction's 10-minute
 walking isochrone.
 
 <p align="center">
-  <img src="outputs/curitiba/reachable_length.png"
+  <img src="outputs/curitiba/reachable_lenth.png"
        alt="Reachable walkable network length in Curitiba"
        width="500">
 </p>
