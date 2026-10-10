@@ -72,7 +72,7 @@ def node_mask(nodes, boundary):
     return nodes.geometry.within(boundary.geometry.iloc[0]).to_numpy()
 
 
-def draw_map(fig, ax, edges_cur, column, title, colorbar_label, scale_values):
+def draw_map(fig, ax, edges_cur, column, title, subtitle, scale_values):
     """Draw the metric map; returns the (lo, hi) of its color scale.
 
     The color scale is taken from `scale_values` — the per-node metric values of
@@ -99,24 +99,34 @@ def draw_map(fig, ax, edges_cur, column, title, colorbar_label, scale_values):
         missing_kwds={"color": "#3a3f47", "linewidth": 0.5},
     )
 
-    sm = plt.cm.ScalarMappable(cmap=CMAP, norm=norm)
-    sm.set_array(v)
-    cbar = fig.colorbar(sm, ax=ax, extend="both", fraction=0.046, pad=0.02)
-    cbar.set_label(colorbar_label, color="white")
-    cbar.ax.yaxis.set_tick_params(color="white")
-    plt.setp(plt.getp(cbar.ax.axes, "yticklabels"), color="white")
-
-    ax.set_title(title, color="white", fontsize=11)
+    # Big city name, with a subtitle just beneath it.
+    ax.set_title(title, color="white", fontsize=34, fontweight="bold", pad=70)
     ax.text(
         0.5,
-        -0.02,
-        f"color clipped to 2nd–98th percentile ({lo:.0f}–{hi:.0f} km); "
-        f"arrows mark saturation",
+        1.02,
+        subtitle,
         transform=ax.transAxes,
         ha="center",
-        color="white",
-        fontsize=8,
+        va="bottom",
+        color="#c4c9d0",
+        fontsize=20,
     )
+
+    # Minimal gradient legend: a "sparse → dense" bar in the bottom-left corner,
+    # with its labels just above the bar (not on it, where white text would clash
+    # with the yellow end of the palette).
+    sm = plt.cm.ScalarMappable(cmap=CMAP, norm=norm)
+    sm.set_array(v)
+    cax = fig.add_axes([0.570, 0.13, 0.33, 0.02])  # bottom-right, raised toward the map
+    cbar = fig.colorbar(sm, cax=cax, orientation="horizontal")
+    cbar.set_ticks([])
+    cbar.outline.set_visible(False)
+    x0, y0 = cax.get_position().x0, cax.get_position().y0
+    w, h = cax.get_position().width, cax.get_position().height
+    gap = 8 / (fig.get_size_inches()[1] * 72)  # ~8 pt gap above the bar
+    fig.text(x0, y0 + h + gap, "sparse", ha="left", va="bottom", color="white", fontsize=16)
+    fig.text(x0 + w, y0 + h + gap, "dense", ha="right", va="bottom", color="white", fontsize=16)
+
     ax.set_axis_off()
     return lo, hi
 
@@ -158,9 +168,8 @@ def main():
         ax,
         ec,
         "reachable_km",
-        f"{display} — reachable walkable network length: path within the {CUTOFF_MIN:g}-min "
-        "walking isochrone\n(single walking speed, 4.5 km/h)",
-        f"Walkable network within {CUTOFF_MIN:g} min (km)",
+        display,
+        f"Reachable walkable network length\n{CUTOFF_MIN:g}-min walking isochrone",
         scale,
     )
     boundary.boundary.plot(ax=ax, color="white", linewidth=0.5, alpha=0.6, zorder=3)
