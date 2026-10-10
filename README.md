@@ -5,7 +5,7 @@ A geospatial-graph analysis built with
 walking network of a city **plus a surrounding buffer**, turns it into a graph,
 and computes a single metric for every junction: **reachable walkable network
 length**, the total walkable length that lies inside that junction's 10-minute
-walking isochrone.
+isochrone.
 
 <p align="center">
   <img src="outputs/curitiba/reachable_length.png"

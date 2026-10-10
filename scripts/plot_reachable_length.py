@@ -1,7 +1,7 @@
 """Network-colored map of reachable walkable network length (sequential viridis).
 
 Colors each segment by its reachable network length — the total walkable network
-length inside the 10-minute walking isochrone — taken as the mean of its two
+length inside the 10-minute isochrone — taken as the mean of its two
 endpoints, clipped to the 2nd-98th percentiles with extend arrows, and sorted
 ascending so higher values draw on top. Segments with no value (in dropped
 fragments) are drawn faintly grey. The metric is computed on the buffered
@@ -36,6 +36,7 @@ CUTOFF_MIN = CUTOFF_S / 60.0  # minutes, matches the metric's cutoff
 PCT_LO = 2.0
 PCT_HI = 98.0
 BG = "#0b0f14"
+DPI = 600
 
 
 def load_network(city="curitiba"):
@@ -72,7 +73,7 @@ def node_mask(nodes, boundary):
     return nodes.geometry.within(boundary.geometry.iloc[0]).to_numpy()
 
 
-def draw_map(fig, ax, edges_cur, column, title, subtitle, scale_values):
+def draw_map(fig, ax, edges_cur, column, title, subtitle, scale_values, cmap=CMAP):
     """Draw the metric map; returns the (lo, hi) of its color scale.
 
     The color scale is taken from `scale_values` — the per-node metric values of
@@ -89,7 +90,7 @@ def draw_map(fig, ax, edges_cur, column, title, subtitle, scale_values):
     edges_cur.plot(
         ax=ax,
         column=column,
-        cmap=CMAP,
+        cmap=cmap,
         norm=norm,
         linewidth=0.5,
         alpha=0.9,
@@ -115,7 +116,7 @@ def draw_map(fig, ax, edges_cur, column, title, subtitle, scale_values):
     # Minimal gradient legend: a "sparse → dense" bar in the bottom-left corner,
     # with its labels just above the bar (not on it, where white text would clash
     # with the yellow end of the palette).
-    sm = plt.cm.ScalarMappable(cmap=CMAP, norm=norm)
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm.set_array(v)
     cax = fig.add_axes([0.570, 0.13, 0.33, 0.02])  # bottom-right, raised toward the map
     cbar = fig.colorbar(sm, cax=cax, orientation="horizontal")
@@ -131,11 +132,22 @@ def draw_map(fig, ax, edges_cur, column, title, subtitle, scale_values):
     return lo, hi
 
 
+def parse_cmap():
+    """Parse ``--cmap`` from the command line; defaults to the module CMAP."""
+    import argparse
+
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--cmap", default=CMAP)
+    return parser.parse_known_args()[0].cmap
+
+
 def main():
     city = parse_city()
+    cmap = parse_cmap()
     display = CITY_CONFIGS[city]["display"]
     metric_path = f"outputs/{city}/reachable_length.npy"
-    plot_path = f"outputs/{city}/reachable_length.png"
+    suffix = "" if cmap == CMAP else f"_{cmap}"
+    plot_path = f"outputs/{city}/reachable_length{suffix}.png"
 
     key = reach_cache_key(city)
     meta_path = metric_path + ".meta"
@@ -169,13 +181,14 @@ def main():
         ec,
         "reachable_km",
         display,
-        f"Reachable walkable network length\n{CUTOFF_MIN:g}-min walking isochrone",
+        f"Reachable walkable network length\n{CUTOFF_MIN:g}-min isochrone",
         scale,
+        cmap,
     )
     boundary.boundary.plot(ax=ax, color="white", linewidth=0.5, alpha=0.6, zorder=3)
 
     os.makedirs(f"outputs/{city}", exist_ok=True)
-    fig.savefig(plot_path, dpi=160, bbox_inches="tight", facecolor=BG)
+    fig.savefig(plot_path, dpi=DPI, bbox_inches="tight", facecolor=BG)
     print(f"Saved to {plot_path}")
     print(f"color scale: {lo:.0f} km (low) -> {hi:.0f} km (high)")
 

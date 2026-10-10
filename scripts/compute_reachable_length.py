@@ -1,4 +1,4 @@
-"""Compute the reachable-network-length metric on the 10-minute walking isochrone.
+"""Compute the reachable-network-length metric on the 10-minute isochrone.
 
 For every junction, ``reachable_length(v)`` is the total walkable network length
 lying inside its 10-minute isochrone — the set of nodes reachable from ``v``
