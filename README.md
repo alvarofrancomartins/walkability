@@ -10,7 +10,7 @@ walking isochrone.
 <p align="center">
   <img src="outputs/curitiba/reachable_length.png"
        alt="Reachable walkable network length in Curitiba"
-       width="480">
+       width="500">
 </p>
 
 <p align="center"><em>Reachable walkable network length in Curitiba. Yellow
